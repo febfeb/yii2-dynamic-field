@@ -32,18 +32,8 @@ $this->params['breadcrumbs'][] = 'View';
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <?php if(isset($dataProvider)) { ?>
-            <?= GridView::widget([
-                'layout' => '{summary}{pager}{items}{pager}',
-                'dataProvider' => $dataProvider,
-                'pager' => [
-                    'class' => yii\widgets\LinkPager::className(),
-                    'firstPageLabel' => 'First',
-                    'lastPageLabel' => 'Last'],
-                'filterModel' => $searchModel,
-                'tableOptions' => ['class' => 'table table-striped table-bordered table-hover'],
-                'headerRowOptions' => ['class' => 'x'],
-                'columns' => [
+            <?php if(isset($dataProvider)) {
+                $column = [
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'urlCreator' => function ($action, $model, $key, $index) {
@@ -55,10 +45,27 @@ $this->params['breadcrumbs'][] = 'View';
                         'contentOptions' => ['nowrap' => 'nowrap', 'style'=>'text-align:center'],
                         //'buttonOptions' => ["class"=>"btn btn-danger"],
                         //'updateOptions' => ["class"=>"btn btn-danger"],
-                    ],
-                    'name',
-                    //'slug_name',
-                ],
+                    ]
+                ];
+
+                /* @var $searchModel \app\models\search\CobaBroh */
+                foreach($searchModel->attributes() as $attribute){
+                    \app\components\NodeLogger::sendLog($attribute);
+                    $column[] = $attribute;
+                }
+
+                ?>
+            <?= GridView::widget([
+                'layout' => '{summary}{pager}{items}{pager}',
+                'dataProvider' => $dataProvider,
+                'pager' => [
+                    'class' => yii\widgets\LinkPager::className(),
+                    'firstPageLabel' => 'First',
+                    'lastPageLabel' => 'Last'],
+                'filterModel' => $searchModel,
+                'tableOptions' => ['class' => 'table table-striped table-bordered table-hover'],
+                'headerRowOptions' => ['class' => 'x'],
+                'columns' => $column,
             ]); ?>
             <?php }else{
                 echo "Please Generate Model First or Click Here : <br>".Html::a("<i class='fa fa-check'></i> Generate Model", ["table/generate", "id" => $model->id], ["class"=>"btn btn-info"]);

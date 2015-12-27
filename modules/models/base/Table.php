@@ -11,6 +11,8 @@ use Yii;
  * @property string $name
  * @property string $slug_name
  * @property string $model_class
+ * @property string $model_base_class
+ * @property string $model_search_class
  * @property string $controller_class
  * @property string $view_path
  *
@@ -37,7 +39,7 @@ class Table extends \yii\db\ActiveRecord
         return [
             [['name', 'slug_name'], 'required'],
             [['name', 'slug_name'], 'string', 'max' => 50],
-            [['model_class', 'controller_class', 'view_path'], 'string', 'max' => 100]
+            [['model_class', 'model_base_class', 'model_search_class', 'controller_class', 'view_path'], 'string', 'max' => 100]
         ];
     }
 
@@ -51,6 +53,8 @@ class Table extends \yii\db\ActiveRecord
             'name' => 'Name',
             'slug_name' => 'Slug Name',
             'model_class' => 'Model Class',
+            'model_base_class' => 'Model Base Class',
+            'model_search_class' => 'Model Search Class',
             'controller_class' => 'Controller Class',
             'view_path' => 'View Path',
         ];

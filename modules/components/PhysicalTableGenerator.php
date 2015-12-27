@@ -15,6 +15,7 @@ use febfeb\dynamicfield\modules\models\Field;
 class PhysicalTableGenerator
 {
     /**
+     * Create new table
      * @param $model \febfeb\dynamicfield\modules\models\Table
      */
     public static function createTable($model){
@@ -33,6 +34,20 @@ class PhysicalTableGenerator
 
         NodeLogger::sendLog($columns);
     }
+
+    /**
+     * Drop table
+     * @param $model
+     * @throws \yii\db\Exception
+     */
+    public static function dropTable($model){
+        if(self::tableExist($model->slug_name)) {
+            $db = \Yii::$app->db;
+            $command = $db->createCommand();
+            $command->dropTable($model->slug_name)->execute();
+        }
+    }
+
 
     /**
      * @param $model \febfeb\dynamicfield\modules\models\Table
@@ -99,5 +114,63 @@ class PhysicalTableGenerator
             "text" => "Text",
             "date" => "Date"
         ];
+    }
+
+    public static function getSafeTableName($tableName){
+        $actual_name = Util::slugifyToDbSafe($tableName);
+        $original_name = $actual_name;
+
+        $i = 1;
+        while(self::tableExist($actual_name))
+        {
+            $actual_name = (string)$original_name."_".$i;
+            $i++;
+        }
+
+        return $actual_name;
+    }
+
+    public static function tableExist($tableName){
+        $sql = "SHOW TABLES LIKE '".$tableName."'";
+        $db = \Yii::$app->db;
+        $command = $db->createCommand($sql);
+        $array = $command->queryAll();
+        if(count($array) == 0){ return false; }
+        return true;
+    }
+
+    public static function getSafeFieldName($tableName, $fieldName){
+        if(self::tableExist($tableName)) {
+            $table_name = Util::slugifyToDbSafe($tableName);
+            $actual_name = Util::slugifyToDbSafe($fieldName);
+            $original_name = $actual_name;
+
+            $i = 1;
+            while (self::fieldExist($table_name, $actual_name)) {
+                $actual_name = (string)$original_name . "_" . $i;
+                $i++;
+            }
+
+            return $actual_name;
+        }else{
+            return Util::slugifyToDbSafe($fieldName);
+        }
+    }
+
+    public static function fieldExist($tableName, $fieldName){
+        if(self::tableExist($tableName)){
+            $sql = "DESC '".$tableName."'";
+            $db = \Yii::$app->db;
+            $command = $db->createCommand($sql);
+            $array = $command->queryAll();
+            foreach($array as $elem){
+                if($elem["Field"] == $fieldName){
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return true;
+        }
     }
 }
